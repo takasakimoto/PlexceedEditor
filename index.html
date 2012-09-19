@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Plexceed Text Editor</title>
+    <meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+    <!--jQuery ui css-->
+    <link rel="stylesheet" href="css/library/jquery-ui-1.8.23.custom.css">
+
+    <!--jQuery Libraries-->
+    <script src="script/library/jquery-1.8.0.min.js"></script>
+    <script src="script/library/jquery-ui-1.8.23.custom.min.js"></script>
+
+    <!--Original CSS-->
+    <link rel="stylesheet" href="css/common/editor.css">
+    <link rel="stylesheet" href="css/common/custom.css">
+    <link rel="stylesheet" href="css/common/style.css">
+
+    <!--Original Libraries-->
+    <script src="script/common/editor.js"></script>
+    <script src="script/common/code-completion.js"></script>
+    <script src="script/common/css-completion.js"></script>
+    <script src="script/common/html-completion.js"></script>
+</head>
+<body>
+<!-- Content goes after the textarea tag below -->
+<form action="./" method="post">
+    <div id="edit-box">
+        <textarea id="editor" name="editor" >
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="utf-8">
+                <title>Hello User!</title>
+                <!-- Place cursor after this and select a
+          JavaScript library from the menu above -->
+
+
+
+                <!-- Supports context-sensitive CSS3 auto-completion -->
+                <!-- Style starts here. Try adding new CSS tags. -->
+                <style type="text/css">
+                    body {
+                        padding: 1em;
+                    }
+                    h1 {
+                        font-size: 200px;
+                        margin-top: 0;
+                        font-family: Arial, sans-serif;
+                        text-shadow: 2px 0px 15px #292929;
+                        letter-spacing: -7px;
+                        text-decoration: none;
+                        color: #ddd;
+                    }
+                </style>
+                <!-- Style ends here -->
+            </head>
+            <body>
+            <!-- Supports context-sensitive HTML5 auto-completion -->
+            <!-- HTML starts here. Try adding new HTML tags. -->
+            <h1> Hello User! </h1>
+            </body>
+            </html>
+        </textarea>
+    </div>
+</form>
+
+<script>
+    // Initialize Editor editor
+    var editor = Editor.fromTextArea(document.getElementById('editor'), {
+        mode: "pophtmlmixed",
+        tabMode: 'indent',
+        lineNumbers: true,
+        lineWrapping: true,
+
+        // Highlights current line
+        onCursorActivity: function() {
+            editor.setLineClass(hlLine, null);
+            hlLine = editor.setLineClass(editor.getCursor().line, "activeline");
+        },
+
+        // Handles the 'selected text' tab issue
+        extraKeys: {
+            "Tab": function(cm) {
+                Editor.commands[cm.getCursor(true).line != cm.getCursor().line ? "indentMore" : "insertTab"](cm);
+            }
+        }
+    });
+
+    // HTML autocomplete
+    var htmlCompletion = new CodeCompletion(editor, new HtmlCompletion());
+    editor.setOption("onKeyEvent", function(cm, e) {
+        return htmlCompletion.handleKeyEvent(cm, e);
+    });
+
+
+    /*
+     var cssCompletion = new CodeCompletion(editor, new CssCompletion());
+     editor.setOption("onKeyEvent", function(cm, e) {
+     return cssCompletion.handleKeyEvent(cm, e);
+     });
+     */
+
+
+    // Select theme
+    function selectTheme(node) {
+        var theme = node.options[node.selectedIndex].innerHTML;
+        editor.setOption("theme", theme);
+
+    }
+
+    // Comment selected HTML text
+    function HTMLcommentSelected() {
+        var textSelected=editor.getSelection();
+        var textReplacedBy="<!--"+	'\n'+	textSelected+	'\n'+	"-->";
+        editor.replaceSelection(textReplacedBy);
+    }
+
+    // Comment selected JS text
+    function JScommentSelected() {
+        var textSelected=editor.getSelection();
+        var textReplacedBy="/*"+	'\n'+	textSelected+	'\n'+	"*/";
+        editor.replaceSelection(textReplacedBy);
+    }
+
+    // Highlight current line
+    var hlLine = editor.setLineClass(0, "activeline");
+
+
+    // Get selected text
+    function getSelectedRange() {
+        return { from: editor.getCursor(true), to: editor.getCursor(false) };
+    }
+
+    // Auto-format selected text
+    function autoFormatSelection() {
+        var range = getSelectedRange();
+        editor.autoFormatRange(range.from, range.to);
+
+    }
+
+
+</script>
+
+</body>
+</html>
